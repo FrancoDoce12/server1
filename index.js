@@ -73,7 +73,8 @@ class ProductMananger {
     }
 
     getProducts() {
-        return JSON.parse(fs.readFile(this.filePath, {encoding:"utf8"},()=>{}))
+        return JSON.parse(fs.readFile(`${this.filePath}`, {encoding:"utf8"},(err)=>{}))
+        //return JSON.parse(fs.readFile(this.filePath, {encoding:"utf8"},()=>{}))
         //return JSON.parse(fs.readFile(this.filePath, "utf8"))
     }
     saveProducts(products) {
