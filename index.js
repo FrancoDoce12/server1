@@ -37,21 +37,30 @@ class ProductMananger {
 
         let products = this.getProducts()
 
+        console.log("first")
+
         let productsWithSameCode = [
             ...products.filter(productIn => {
                 productIn.code == product.code
             })
         ]
 
+        console.log("second")
+
         if (productsWithSameCode.length > 0) {
             console.log(`${product} have the code repited `)
             return false
         }
 
+        console.log("third")
+
         if (!(product.id)) {
             product.id = this.idGenerator()
         }
+        console.log("final")
         return true
+
+        
     }
 
     idGenerator() {
