@@ -108,9 +108,7 @@ class ProductMananger {
 
     async getProducts() {
 
-        let data = await fs.readFile(`${this.filePath}`, { encoding: "utf8" }, (err) => {
-            console.log(err)
-        })
+        let data = await fs.readFile(`${this.filePath}`, { encoding: "utf8" }, (err) => {})
 
         let products
 
@@ -125,9 +123,7 @@ class ProductMananger {
     }
 
     saveProducts(products) {
-        fs.writeFile(this.filePath, JSON.stringify(products),err =>{
-            console.log(err)
-        })
+        fs.writeFile(this.filePath, JSON.stringify(products),err =>{})
     }
 
     getProductById(id) {

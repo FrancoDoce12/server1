@@ -3,9 +3,6 @@ const express = require("express");
 const ProductMananger = require("./productMananger.js")
 const initialProducts = require("./initialProducts")
 
-
-console.log("index.js executing")
-
 // start of the actual server
 
 
