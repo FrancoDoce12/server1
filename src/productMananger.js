@@ -3,85 +3,131 @@ const fs = require('fs')
 class ProductMananger {
 
     constructor(initialProducts, filePath) {
-        let products = []
-        initialProducts.forEach(product => {
 
-            if (this.productValidation(product)) {
-                products.push(product)
-            } else {
-                console.log(product, "is invalid")
-            }
-
-        });
-        fs.writeFile(filePath, JSON.stringify(products), (err) => {
-            if (err) throw err
-
-        })
-
-        this.lastId = 0
         this.filePath = filePath
+        this.lastId = 0
+
+        let products = this.productsValidated(initialProducts)
+
+
+        this.deleteAndAddNewData(products)
+
+
     }
 
     // utilities methods (those that only are used inside this class)
 
-    productValidation(product) {
-        if (!((product.title) && (product.description) && (product.price) && (product.thumbnail) && (product.code) && (product.stock))) {
-            return false
-        }
-
-        let products = this.getProducts()
-
-        console.log("first")
-
-        let productsWithSameCode = [
-            ...products.filter(productIn => {
-                productIn.code == product.code
-            })
-        ]
-
-        console.log("second")
-
-        if (productsWithSameCode.length > 0) {
-            console.log(`${product} have the code repited `)
-            return false
-        }
-
-        console.log("third")
-
-        if (!(product.id)) {
-            product.id = this.idGenerator()
-        }
-        console.log("final")
-        return true
-
-        
+    
+    utilsGetCodes(array){
+        const codes = {}
+        array.forEach(item=>{
+            codes[item.code] = item.code
+        })
+        return codes
     }
 
-    idGenerator() {
-        newId = this.id
-        this.id = this.id++
+
+
+    // validation functions
+
+    async productsValidated(products){
+
+
+        // first validation
+        let validateObjectProducts = []
+        for (let i = 0; i < products.length; i++) {
+            const product = products[i];
+            if(this.prodcutVlaidationObject(product)){
+                validateObjectProducts.push(product)
+            } else {
+                console.log(product, "is not validated")
+            }
+        }
+
+        
+        if (validateObjectProducts.length == 0 ) {
+            return []
+        }
+
+        // second validations
+        let dataProductsCodes = this.utilsGetCodes(await this.getProducts())
+
+        let validateProducts = []
+        for (let i = 0; i < validateObjectProducts.length; i++) {
+            const product = validateObjectProducts[i];
+            if (!(dataProductsCodes[product.code])){
+                validateProducts.push(product)
+            } else {
+                console.log(product, "code is repited")
+            }
+        }
+
+
+        // adding one id to the validated objects
+        validateProducts.forEach(product=>{
+            product.id = this.getNextId()
+        })
+
+        return validateProducts
+    }
+
+    getNextId(){
+        let newId = this.lastId
+        this.lastId++
         return newId
     }
 
+    // just validate the objejt propieties
+    prodcutVlaidationObject(product){
+        if (!((product.title) && (product.description) && (product.price) && (product.thumbnail) && (product.code) && (product.stock))) {
+            return false
+        } else {return true}
+    }
+
+
+
+
     // functionals methods ( those that are normaly used )
 
-    addProduct(product) {
-        // esto de abajo se podria crear una funcion pero lo dejo hasi 
-        // porque no creo que sea tan nesesario añadirle tanta compleijidad en este ejemplo
-        if (productValidation(product)) {
-            this.saveProducts(this.getProducts().push(product))
-        } else {
-            console.log(product, "is invalid")
-        }
+    async deleteAndAddNewData(newDataArray){
+        let data = await newDataArray
+        this.saveProducts(data)
     }
 
-    getProducts() {
-        return JSON.parse(fs.readFile(`${this.filePath}`, {encoding:"utf8"},(err)=>{}))
-        //return JSON.parse(fs.readFile(this.filePath, {encoding:"utf8"},()=>{}))
-        //return JSON.parse(fs.readFile(this.filePath, "utf8"))
+    async addProduct(product = "") {
+        
+        let validateProduct = await this.productsValidated([product])
+
+        if (validateProduct.length > 0 ) {
+            this.saveProducts((await this.getProducts()).push(product))
+        }  else {
+            console.log(product, "has not been added")
+        }
+
     }
+
+    async getProducts() {
+
+        let data = await fs.readFile(`${this.filePath}`, { encoding: "utf8" }, (err) => {
+            console.log(err)
+        })
+
+        let products
+
+        if(data){
+            products = JSON.parse(data)
+        } else {
+            products = []
+        }
+        
+        return products
+        
+    }
+
     saveProducts(products) {
-        fs.writeFile(this.filePath, JSON.stringify(products))
+        fs.writeFile(this.filePath, JSON.stringify(products),err =>{
+            console.log(err)
+        })
     }
 
     getProductById(id) {
@@ -120,5 +166,5 @@ class ProductMananger {
     }
 }
 
+
 module.exports = ProductMananger
-//export default ProductMananger
