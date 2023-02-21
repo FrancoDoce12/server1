@@ -8,71 +8,63 @@ class ProductMananger {
         this.filePath = filePath
         this.lastId = 0
 
-        let products = this.productsValidated(initialProducts)
+        initialProducts = utils.transformToArray(initialProducts)
 
-        if (products.length > 0) {
-            this.deleteAndAddNewData(products)
-        } else {
-            this.addProducts(products)
-        }
-    } 
+        let validateObjectProducts = this.validateObjectsProducts(initialProducts)
+
+        validateObjectProducts = this.addIDsToProducts(validateObjectProducts)
+
+        this.deleteAndAddNewData(validateObjectProducts)
+
+    }
 
     // utilities methods (those that only are used inside this class)
 
 
-    utilsGetCodes(array) {
-        const codes = {}
-        array.forEach(item => {
-            codes[item.code] = item.code
-        })
-        return codes
-    }
-
-
-
     // validation functions
 
-    async productsValidated(products) {
 
-        products = utils.transformToArray(products) // it will be always an array
 
-        // first validation
+    validateObjectsProducts(products) {
+        products = utils.transformToArray(products)
+
         let validateObjectProducts = []
-        for (let i = 0; i < products.length; i++) {
-            const product = products[i];
+        products.forEach(product => {
             if (this.prodcutVlaidationObject(product)) {
                 validateObjectProducts.push(product)
             } else {
                 console.log(product, "is not validated")
             }
-        }
-
-
-        if (validateObjectProducts.length == 0) {
-            return []
-        }
-
-        // second validations
-        let dataProductsCodes = this.utilsGetCodes(await this.getProducts())
-
-        let validateProducts = []
-        for (let i = 0; i < validateObjectProducts.length; i++) {
-            const product = validateObjectProducts[i];
-            if (!(dataProductsCodes[product.code])) {
-                validateProducts.push(product)
-            } else {
-                console.log(product, "code is repited")
-            }
-        }
-
-
-        // adding one id to the validated objects
-        validateProducts.forEach(product => {
-            product.id = this.getNextId()
         })
 
-        return validateProducts
+        return validateObjectProducts
     }
+
+    validateProductsCodes(products) {
+        products = utils.transformToArray(products)
+
+        let oldProductsCodes = this.utilsGetCodes(this.getProducts())
+        let validatedProducts = []
+
+        products.forEach(product => {
+            if (!(oldProductsCodes[product.code])) {
+                validatedProducts.push(product)
+            } else {
+                console.err(product, "the code of this product is repited with the alredy existent data")
+            }
+        })
+        return validatedProducts
+    }
+
+    addIDsToProducts(products) {
+        products = utils.transformToArray(products)
+
+        products.forEach(product => {
+            product.id = this.getNextId()
+        })
+        return products
+    }
+
 
     getNextId() {
         let newId = this.lastId
@@ -99,10 +91,12 @@ class ProductMananger {
 
     async addProducts(products) {
 
-        let validateProduct = await this.productsValidated(products)
+        let validateProducts = this.validateObjectsProducts(products)
 
-        if (validateProduct.length > 0) {
-            this.saveProducts((await this.getProducts()).push(products))
+        validateProducts = this.validateProductsCodes(products)
+
+        if (validateProducts.length > 0) {
+            this.saveProducts((this.getProducts()).push(products))
         } else {
             console.log(products, "has not been added")
         }
@@ -127,6 +121,7 @@ class ProductMananger {
     }
 
     saveProducts(products) {
+        products = utils.transformToArray(products)
         fs.writeFileSync(this.filePath, JSON.stringify(products), err => { })
     }
 
@@ -138,10 +133,16 @@ class ProductMananger {
         })
         let product = products[0]
 
-        return product
+        if (!product) {
+            console.err(`product id: "${id}" NOT FUND`)
+            return
+        }
 
+        return product
     }
 
+
+    //revisar funcion
     updateProduct(id, data) {
         let oldProduct = getProductById(id)
         Object.keys(data).forEach((property) => {
@@ -153,6 +154,8 @@ class ProductMananger {
         addProduct(oldProduct)
     }
 
+
+    // revisar fundion
     deleteProduct(id) {
         let products = this.getProducts()
         let index = 0

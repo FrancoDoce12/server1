@@ -3,6 +3,7 @@ const handlebars = require("express-handlebars")
 
 const ProductMananger = require("./productMananger.js")
 const initialProducts = require("./initialProducts")
+const utils = require("./utils")
 
 // start of the actual server
 
@@ -27,22 +28,23 @@ app.get('/',  (req, res) => {
 
     let products =  productMananger.getProducts()
 
-    console.log(products)
-
     res.render("home",{
         products,
         title: "holaaa"
     })
 })
 
-// app.get("/", (req,res)=>{
-//     res.send()
-// })
 
 app.listen(8000, () => {
     console.log("server started!")
 })
 
+
+// let one = utils.transformToArray("hola")
+// let two = utils.transformToArray(["hola"])
+// let three = utils.transformToArray([])
+
+// console.log(one,"one",two,"two",three,"three")
 
 
 
