@@ -56,22 +56,6 @@ const serverSocket = new Server(serverHTTP)
 
 productMananger.serverSocket = serverSocket
 
-setTimeout(()=>{
-    serverSocket.emit("change",productMananger.getProducts())
-    console.log("time ioute")
-},5000)
-
-// serverSocket.on('change', socket => {
-//     console.log("se registro un cambio en el servidor");
-    
-// })
-
-
-// let one = utils.transformToArray("hola")
-// let two = utils.transformToArray(["hola"])
-// let three = utils.transformToArray([])
-
-// console.log(one,"one",two,"two",three,"three")
 
 
 

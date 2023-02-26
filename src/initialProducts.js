@@ -88,4 +88,4 @@ const products = [
         stock: 4
     }]
 
-    module.exports = products
+    module.exports = products 
