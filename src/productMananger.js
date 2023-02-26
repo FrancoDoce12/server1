@@ -123,6 +123,10 @@ class ProductMananger {
     saveProducts(products) {
         products = utils.transformToArray(products)
         fs.writeFileSync(this.filePath, JSON.stringify(products), err => { })
+        if (this.serverSocket) {
+            console.log("se emitio el change con los nuevos datos")
+            this.serverSocket.emit('change',this.getProducts())
+        }
     }
 
     getProductById(id) {
